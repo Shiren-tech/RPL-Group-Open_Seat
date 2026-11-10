@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\UserQuest;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $primaryKey = 'user_id'; // Important because of your migration!
+    protected $primaryKey = 'user_id';
 
     protected $fillable = [
         'name',
@@ -22,6 +21,7 @@ class User extends Authenticatable
         'pfp',
         'dob',
         'hobby',
+        'interests',
         'total_xp',
         'orb_level',
         'role',
@@ -39,13 +39,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'dob' => 'date',
+            'interests' => 'array',
         ];
     }
 
     public function activities()
     {
-        return $this->belongsToMany(Activity::class, 'activity_participants', 'user_id', 'activity_id', 'user_id', 'activity_id')
-                    ->withPivot('joined_at', 'status')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            Activity::class,
+            'activity_participants',
+            'user_id',
+            'activity_id',
+            'user_id',
+            'activity_id'
+        )->withPivot('joined_at', 'status')
+        ->withTimestamps();
+    }
+
+    public function quests(): HasMany
+    {
+        return $this->hasMany(UserQuest::class, 'user_id', 'user_id');
     }
 }
